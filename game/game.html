@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Guess The Word</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0b52b;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        fieldset {
+            border: 2px solid #333;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        legend.title {
+            font-size: 1.5em;
+            font-weight: bold;
+            background-color: rgb(256, 204, 172);
+            padding: 0 10px;
+            border-radius: 5px;
+        }
+
+        .empty_img {
+            width: 10%;
+            height: auto;
+        }
+
+        .heart_image {
+            width: 20px;
+            height: auto;
+        }
+
+        .info {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+
+        .info p {
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        input#guess {
+            padding: 10px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let word = "STOCK";
+            let hiddenWord = Array(word.length).fill("_");
+            let lives = 3;
+            let score = 0;
+
+            const guessInput = document.getElementById("guess");
+            const submitBtn = document.getElementById("submit-btn");
+            const resetBtn = document.getElementById("reset-btn");
+            const message = document.getElementById("message");
+            const scoreDisplay = document.getElementById("score");
+            const livesDisplay = document.getElementById("lives");
+            const cardImages = document.querySelectorAll(".image-container img");
+
+            function updateCards() {
+                word.split("").forEach((letter, index) => {
+                    if (hiddenWord[index] !== "_") {
+                        cardImages[index].src = `${letter}.svg`;
+                    }
+                });
+            }
+
+            function updateLives() {
+                if (livesDisplay) {
+                    livesDisplay.innerHTML = "Lives: " + "❤️".repeat(lives);
+                }
+            }
+
+            function updateScore() {
+                if (scoreDisplay) {
+                    scoreDisplay.textContent = `Score: ${score}`;
+                }
+            }
+
+            function resetGame() {
+                hiddenWord = Array(word.length).fill("_");
+                lives = 3;
+                score = 0;
+
+
+                if (message) {
+                    message.textContent = "Let's Play The Game!";
+                }
+
+                if (guessInput) {
+                    guessInput.value = "";
+                }
+
+                cardImages.forEach(card => card.src = "empty.svg");
+
+                updateLives();
+                updateScore();
+            }
+
+            function checkGuess() {
+                const guess = guessInput.value.toUpperCase().trim();
+                guessInput.value = "";
+
+                if (!guess) {
+                    if (message) {
+                        message.textContent = "Please enter a guess!";
+                    }
+                    return;
+                }
+
+                if (guess.length === 1) {
+                    if (word.includes(guess)) {
+                        word.split("").forEach((letter, index) => {
+                            if (letter === guess) hiddenWord[index] = guess;
+                        });
+                        score += 20;
+                        if (message) {
+                            message.textContent = `Good job! ${guess} is correct.`;
+
+                        }
+                    } else {
+                        lives--;
+                        if (message) {
+                            message.textContent = `Wrong guess! ${guess} is not in the word.`;
+
+                        }
+                    }
+                } else if (guess === word) {
+                    score += 100;
+                    hiddenWord = word.split("");
+                    if (message) {
+                        message.textContent = "Congratulations! You guessed the word!";
+                        alert("Congratulations! You guessed the word!");
+                    }
+                } else {
+                    lives = 0;
+                    if (message) {
+                        message.textContent = `You lost! The word was ${word}.`;
+                        alert(`You lost! The word was ${word}.`);
+                    }
+                }
+
+                if (lives === 0) {
+                    if (message) {
+                        message.textContent = `Game over! The word was ${word}.`;
+                        alert(`Game over! The word was ${word}.`);
+                    }
+                    submitBtn.disabled = true;
+                } else if (!hiddenWord.includes("_")) {
+                    if (message) {
+                        message.textContent = "You won! Great job!";
+                        alert("You won! Great job!");
+                    }
+                    submitBtn.disabled = true;
+                }
+
+                updateCards();
+                updateLives();
+                updateScore();
+            }
+
+            resetGame();
+
+            submitBtn.addEventListener("click", (event) => {
+                event.preventDefault();
+                checkGuess();
+            });
+
+            resetBtn.addEventListener("click", (event) => {
+                event.preventDefault();
+                submitBtn.disabled = false;
+                resetGame();
+            });
+
+        });
+    </script>
+
+    <div class="container">
+        <h1>Guess The Word! 🎮</h1>
+        <fieldset>
+            <legend class="title"><strong>WORD</strong></legend>
+            <div class="image-container">
+                <img class="empty_img" id="card-0" src="empty.svg">
+                <img class="empty_img" id="card-1" src="empty.svg">
+                <img class="empty_img" id="card-2" src="empty.svg">
+                <img class="empty_img" id="card-3" src="empty.svg">
+                <img class="empty_img" id="card-4" src="empty.svg">
+            </div>
+        </fieldset>
+    </div>
+
+    <div class="info">
+        <div>
+            <p>Lives:</p>
+            <div id="lives">❤️❤️❤️</div>
+        </div>
+        <div>
+            <p>Score:</p>
+            <p id="score">0</p>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <label for="guess">Guess The Word!</label>
+        <input id="guess" type="text" placeholder="Enter your guess!">
+        <button type="button" id="submit-btn">Guess</button>
+        <button type="button" style="background-color: blue;" id="reset-btn">Reset the Game!</button>
+        <p id="message">Let's Play the Game!</p>
+    </div>
+
+    <div class="container">
+        <fieldset>
+            <legend class="title">How To Play</legend>
+            <p>-Guess one letter at a time or the entire word.</p>
+            <p>-Each correct letter earns 20 points.</p>
+            <p>If the entire word is guessed correctly, you win the game.</p>
+            <p>-Players have 3 lives; one life is lost for each incorrect guess.</p>
+            <p>-The game is lost when lives run out.</p>
+            <p>-Press the "Reset Game" button to restart.</p>
+            <p>Good Luck!</p>
+        </fieldset>
+        <div class="footer">
+            <p>Created by Regaip Cuma Erdihan</p>
+            <p>Contact: <a href="mailto:erdihan23@itu.edu.tr">erdihan23@itu.edu.tr</a></p>
+        </div>
+    </div>
+
+</body>
+
+</html>
